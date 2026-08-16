@@ -1,6 +1,6 @@
 # DifferentMachine — CURRENT HANDOFF
 
-**Status:** v0 executable substrate + coupled-frontier + capacity-scaling + learned-locality + bounded-online-plasticity receipts committed. Gate 0/0b/1A/1B/1C/1D are still mechanism receipts/instruments, not a full matched architecture result.
+**Status:** v0 executable substrate + coupled-frontier + capacity-scaling + learned-locality + bounded-online-plasticity + delayed causal-flow credit receipts committed. Gate 0/0b/1A/1B/1C/1D/1E-A are still mechanism receipts/instruments, not a full matched architecture result.
 
 ## One-line thesis
 
@@ -14,6 +14,7 @@ z(t) local state + last-touch time
 A(t) addressed / expanding active frontier
 m(t) candidate/promoted outward event
 k     persistent receiver<->branch relationship state / locality overlay
+e     bounded local causal-flow eligibility waiting for task consequence
 ```
 
 `EventMachine` performs exact lazy updates of contact, branch and receiver state.
@@ -21,6 +22,7 @@ k     persistent receiver<->branch relationship state / locality overlay
 `frontier.py` adds a coupled cable graph in which an addressed event can open a best-first causal frontier through neighboring branches under a hard branch-touch budget.
 `plasticity.py` adds offline learned-locality instruments.
 `online_plasticity.py` adds a fixed-degree receiver-local graph that changes only at the two endpoints of each co-use event; local forgetting, reinforcement, insertion and eviction are all O(degree) and require no global pair table or global aging sweep.
+`flow_credit.py` removes the explicit useful-pair teacher for Gate 1E-A: it keeps a fixed-degree overlay plus a bounded candidate scaffold and applies delayed task consequence only to the addressed row using before/after receiver-flow eligibility.
 
 ## Gate 0 — same machine, different execution
 
@@ -195,6 +197,86 @@ This is still established associative/structural-plasticity territory, not a nov
 
 See `docs/GATE1D_ONLINE_PLASTICITY.md`.
 
+## Gate 1E-A — can task consequence replace the useful-pair teacher?
+
+Gate 1D still received `(receiver, i, j)` co-use as an explicit teaching event. Gate 1E-A removes that pair label and imports the useful negative lesson from `FunctionalArbors`: recent activity / structural birth identity need not be causal enough; eligibility should move closer to **what the structural event actually changed downstream**.
+
+Each task event now records only a bounded local causal-flow trace:
+
+```text
+ordinary receiver query
+        |
+        +-- ablate one current edge -> receiver-flow delta
+        |
+        `-- probe one local candidate -> receiver-flow delta
+
+store: cue, edge ids, the two deltas, receiver's own output sign
+
+... 8 task events later ...
+
+environment returns only:
+    +1 task correct
+    -1 task wrong
+
+credit = outcome * earlier output sign * flow delta
+```
+
+Plasticity never receives hidden group id, useful neighbor id or a pair co-use tuple.
+Only the addressed fixed-degree row is aged/changed when delayed credit settles.
+
+### Verified local receipt
+
+Two seeds (`41,42`), degree 4, fixed 12-candidate proposal scaffold, six-node receiver query budget:
+
+```text
+N      initial   learned old   immediately after switch   recovered
+64       .653        .846               .616                 .874
+128      .640        .874               .617                 .886
+256      .637        .879               .618                 .887
+```
+
+Ordinary receiver query work is fixed at 30 logical operations in the instrument.
+Persistent overlay + proposal storage is 20 / 40 / 80 KB at N=64 / 128 / 256.
+
+Representative N=128 post-switch learning accounting:
+
+```text
+receiver probe-query work / task event   89.0
+proposal inspections / task event        12.0
+bounded slot ops / task event            ~60.8
+row updates / task event                  1.00
+```
+
+The 89 is intentionally visible: the current eligibility instrument pays the normal query plus one existing-edge ablation query plus one candidate-perturbation query.
+
+### Causal controls at N=128
+
+```text
+mode                 learned old   recovered
+main flow x outcome      .874         .886
+outcome shuffled         .629         .602
+flow only                .587         .614
+reward only              .595         .656
+frozen                    .625         .639
+```
+
+Thus neither structural flow change alone nor task success alone reproduces the effect in this toy; the causal pairing does.
+
+**Narrow Gate 1E-A receipt:**
+
+> **Given a bounded local proposal scaffold that already contains useful alternatives, receiver-relative topology can be selected and re-selected from delayed end-to-end task consequence without a useful-pair teaching event.**
+
+### The cheats that remain
+
+This is not the full Gate 1E finish.
+
+1. **Proposal discovery is still supplied.** Each node has a fixed 12-candidate physical scaffold deliberately constructed from the union of possible old/new neighborhoods for both receivers plus distractors. The learner must select among candidates, but it does not invent their availability.
+2. **Causal-flow measurement costs work.** Two extra bounded traversals are run per task event.
+3. **The task is binary and synthetic.** Correct/wrong outcome plus the receiver's own earlier output direction is unusually informative.
+4. ANN / sparse-table / delta-RNN / MoE / generic-router controls remain mandatory for the full architecture claim.
+
+See `docs/GATE1E_FLOW_CREDIT.md`.
+
 ## Files
 
 ```text
@@ -202,6 +284,7 @@ different_machine/core.py
 different_machine/frontier.py
 different_machine/plasticity.py
 different_machine/online_plasticity.py
+different_machine/flow_credit.py
 
 experiments/gate0_same_machine.py
 experiments/gate0b_receiver_frontier.py
@@ -209,17 +292,20 @@ experiments/gate1a_coupled_frontier.py
 experiments/gate1b_capacity_scaling.py
 experiments/gate1c_learned_locality.py
 experiments/gate1d_online_plasticity.py
+experiments/gate1e_flow_credit.py
 
 tests/test_core.py
 tests/test_frontier.py
 tests/test_plasticity.py
 tests/test_online_plasticity.py
+tests/test_flow_credit.py
 
 docs/ARCHITECTURE.md
 docs/GATE1.md
 docs/GATE1B_CAPACITY_SCALING.md
 docs/GATE1C_LEARNED_LOCALITY.md
 docs/GATE1D_ONLINE_PLASTICITY.md
+docs/GATE1E_FLOW_CREDIT.md
 ```
 
 ## Biological motivation, not implementation claim
@@ -227,6 +313,8 @@ docs/GATE1D_ONLINE_PLASTICITY.md
 Aizenbud et al. 2026 motivate separating rich dendritic processing from narrow outward spike communication: morphology can support electrical compartmentalization / semi-independent dendritic subunits, while their functional-complexity assay ultimately evaluates somatic spike prediction.
 
 DifferentMachine does **not** claim to simulate a biological neuron.
+
+FunctionalArbors contributes a negative-result guardrail rather than a biological claim: v0.9 found that recent activity and exact birth-event eligibility were not sufficient for robust free structural credit, motivating a local before/after flow-redistribution tag as the next cleaner causal mark.
 
 ## Prior-art guardrail
 
@@ -247,31 +335,37 @@ associative graph learning / clustering
 sparse retrieval / indexing
 local / activity-dependent structural plasticity
 online graph rewiring
+three-factor / reward-modulated plasticity
+perturbation-based structural credit assignment
 ```
 
 The possible contribution has to survive as the **combination and measured frontier**: persistent addressed local state + learned/adaptive bounded locality + expanding causal frontier + hierarchical promotion + receiver-specific relationship state, with total work tied to receiver-relevant causal change.
 
 ## Immediate next gate
 
-Gate 1D still receives receiver-labelled pair co-use as an explicit teaching signal. That is now the biggest cheat.
+The explicit useful-pair teacher has now been removed from the credit-assignment instrument. The largest remaining cheat is the fixed local proposal scaffold.
 
-The next experiment should ask:
+The next question is therefore:
 
-> **Can useful local topology emerge from end-to-end task consequences rather than being told which pair co-occurred?**
+> **Can candidate relations themselves arise from an ordinary real substrate / event stream, while useful credit and discovery both remain bounded?**
 
-Requirements:
+Requirements for the next stage:
 
 ```text
-streaming task, not known group recall
-no latent pair label supplied to plasticity
-local eligibility / credit state only
+no latent useful-pair label
+no hand-prepared union of useful candidate neighborhoods
+candidate structure produced by an ordinary stream / substrate
+local causal eligibility only
 receiver/task switch without reset
-same fixed degree and bounded update memory
+fixed-degree bounded persistent memory
+account candidate-discovery cost + eligibility-probe cost
 ANN / sparse-table retrieval controls
 delta / event-RNN / MoE / generic-router controls
 actual query + update wall clock and memory traffic
 ```
 
-If task-driven local credit cannot recover the bounded-locality advantage, DifferentMachine remains a useful systems decomposition / learned index rather than a new AI execution architecture.
+This is where the repo combinations become relevant: event vision can supply natural sparse arrivals and physical neighborhoods; Mycelial Cortex can supply persistent distributed memory; Clutch can decide when to widen; MaturingGate can suppress predictable propagation; HorizonNet's autopsy suggests receiver/decision-space stopping rather than global state settling.
+
+If task-driven candidate discovery cannot recover the bounded-locality advantage under these controls, DifferentMachine remains a useful systems decomposition / learned index rather than a new AI execution architecture.
 
 The full matched Gate 1 conditional-compute comparison remains mandatory before any architecture claim.
