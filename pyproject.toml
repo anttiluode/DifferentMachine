@@ -1,0 +1,10 @@
+[project]
+name = "different-machine"
+version = "0.0.1"
+description = "Research sketch for persistent local state and receiver-conditioned event execution"
+requires-python = ">=3.11"
+dependencies = ["numpy>=1.26"]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
+testpaths = ["tests"]
