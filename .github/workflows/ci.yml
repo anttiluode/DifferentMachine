@@ -48,3 +48,6 @@ jobs:
 
       - name: Gate 1C learned locality
         run: python experiments/gate1c_learned_locality.py
+
+      - name: Gate 1D online plasticity
+        run: python experiments/gate1d_online_plasticity.py
