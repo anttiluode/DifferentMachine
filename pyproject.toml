@@ -1,9 +1,16 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
 [project]
 name = "different-machine"
 version = "0.0.1"
 description = "Research sketch for persistent local state and receiver-conditioned event execution"
 requires-python = ">=3.11"
 dependencies = ["numpy>=1.26"]
+
+[tool.setuptools]
+packages = ["different_machine"]
 
 [tool.pytest.ini_options]
 pythonpath = ["."]
