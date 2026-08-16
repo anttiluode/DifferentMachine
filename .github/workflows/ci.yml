@@ -39,3 +39,6 @@ jobs:
 
       - name: Gate 0b receiver frontier receipt
         run: python experiments/gate0b_receiver_frontier.py
+
+      - name: Gate 1A coupled frontier instrument
+        run: python experiments/gate1a_coupled_frontier.py
