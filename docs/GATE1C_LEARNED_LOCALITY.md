@@ -103,14 +103,74 @@ neighbors = 5/8 = 62.5% of the group. The 75% target therefore requires useful
 multi-hop structure rather than a single direct lookup at the same stored degree.
 A wider direct table remains a legitimate memory-for-compute control.
 
-## What would count as a useful receipt?
+## Founding receipt
 
-- Receiver-conditioned learned locality reaches the recall target with query work
-  that grows much more slowly than N.
-- Random locality grows toward global-search cost.
-- A pooled graph succeeds when receiver needs are aligned.
-- A pooled graph degrades when receiver needs are incompatible.
-- Persistent receiver-specific graph memory is reported and grows with N.
+GitHub Actions reproduced the deterministic result under Python 3.11 and 3.13.
+For conflicting receiver localities:
+
+```text
+N      pooled work   receiver-conditioned work   random work
+64          137.0                 30.0               207.1
+128         285.5                 30.0               399.9
+256         586.2                 30.0               801.2
+512        1230.2                 30.0              1603.3
+
+fit:
+pooled                W ~ N^1.054
+receiver-conditioned  W ~ N^0.000
+random                W ~ N^0.986
+```
+
+The receiver-conditioned graph required exactly 6 node touches at every capacity
+for both receivers. The pooled graph required roughly 26--29 touches at N=64 and
+240--252 touches at N=512.
+
+Persistent compiled graph memory at N=512:
+
+```text
+one pooled degree-4 graph       32 KB
+two receiver degree-4 overlays  64 KB
+```
+
+So constant query work was purchased with additional persistent relationship
+structure; the memory cost was not hidden.
+
+### Aligned-receiver control
+
+When both receivers were assigned the same latent partition, the pooled graph
+returned to exactly:
+
+```text
+6 node touches
+30 logical work
+100% query success
+```
+
+for every N = 64, 128, 256, 512, giving `W ~ N^0.000`.
+
+This control supports the intended interpretation: the pooled failure in the
+conflicting condition comes from incompatible locality requirements rather than
+from pooling itself.
+
+## What this earns
+
+A narrow toy-level statement:
+
+> **Repeated receiver-labelled co-use can be compiled into bounded local
+> structure whose query work is independent of total stored capacity, but a
+> single universal locality can fail when different receivers require
+> incompatible neighborhoods.**
+
+The stronger architectural suggestion is therefore relational:
+
+```text
+stored substrate
+    + receiver/task-specific relationship overlay
+        -> locally discoverable active frontier
+```
+
+Locality may be partly a property of an edge/relationship, not only a property of
+the sender's global representation.
 
 ## Kill / demotion rules
 
@@ -128,10 +188,13 @@ receiver-conditioned query work grows ~N
     -> learned locality did not separate capacity from retrieval work
 ```
 
+The founding receipt passes these toy-level checks, but that is not yet a
+DifferentMachine architecture result.
+
 ## What this cannot establish
 
-Even a clean positive receipt would not show that DifferentMachine has a new
-learning algorithm. In particular:
+Even this clean receipt does not show that DifferentMachine has a new learning
+algorithm. In particular:
 
 - pair-count clustering is established;
 - inference uses known receiver identity;
@@ -141,7 +204,22 @@ learning algorithm. In particular:
 - no delta/MoE/ANN/associative-memory retrieval baseline is yet matched;
 - no hardware result follows.
 
-The next harder question, if this receipt passes, is whether a **bounded online
-plasticity rule** can learn/adapt the local substrate without a global count table,
-and whether its total memory/work/reacquisition frontier beats strong sparse
-retrieval and conditional-routing controls.
+## Next gate
+
+Ask whether a **bounded online plasticity rule** can learn and continually adapt
+these receiver-relative local neighborhoods without a global pair-count table.
+
+Required additions:
+
+```text
+fixed O(degree) or O(degree log degree) state per node/receiver
+streaming edge promotion / eviction only
+regime change without reset
+reacquisition curve and cumulative learning cost
+flat sparse-key/value and ANN retrieval controls
+same memory budget across graph and direct-table arms
+actual query/update wall clock
+```
+
+If online local plasticity cannot recover the constant-work regime, the
+"growing cable space" interpretation should be demoted to offline indexing.
