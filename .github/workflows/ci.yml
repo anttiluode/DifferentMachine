@@ -42,3 +42,6 @@ jobs:
 
       - name: Gate 1A coupled frontier instrument
         run: python experiments/gate1a_coupled_frontier.py
+
+      - name: Gate 1B capacity scaling
+        run: python experiments/gate1b_capacity_scaling.py
