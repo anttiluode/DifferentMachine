@@ -1,0 +1,39 @@
+name: DifferentMachine CI
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.13"]
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: Install
+        run: python -m pip install --upgrade pip numpy pytest
+
+      - name: Compile
+        run: python -m compileall -q different_machine experiments tests
+
+      - name: Tests
+        run: pytest -q
+
+      - name: Gate 0 exact execution receipt
+        run: python experiments/gate0_same_machine.py
+
+      - name: Gate 0b receiver frontier receipt
+        run: python experiments/gate0b_receiver_frontier.py
