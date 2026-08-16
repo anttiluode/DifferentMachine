@@ -43,6 +43,7 @@ local degree               4
 signal probability         0.80
 old-regime acquisition     60 events/node/receiver
 recall target              75%
+seeds                       41, 42, 43
 ```
 
 Persistent graph memory is exactly linear in N and fixed per node/receiver. With int64 neighbor ids and float64 strengths:
@@ -79,37 +80,82 @@ Same bounded graph, same memory, same update pattern, but `decay=1.0`. Old stron
 
 Same storage shape, but each row stores only the most recently observed distinct neighbors. It adapts quickly but does not integrate repeated evidence against structured distractors.
 
-## Pass pattern
+## GitHub Actions receipt
 
-A useful mechanism receipt requires:
+Averaged over the three deterministic seeds:
 
-- low steady-state query work with `W ~ N^alpha`, alpha near 0;
-- immediate post-change work growing toward global-search scaling;
-- recovery to near-flat query work after a roughly constant number of new events per node;
-- O(degree) update work independent of N;
-- explicit linear persistent-memory cost;
-- no-forgetting and recency controls fail to recover the same query frontier.
+```text
+N    steady   shift0    e8      e16     e24     e32     e48     e64    KB   slotOps/pair
+64     30.0    196.7    202.5    154.9     60.2     32.1     30.6     30.0     8       25.65
+128    30.0    379.1    382.6    309.4     94.6     35.5     30.5     30.1    16       25.75
+256    30.0    739.4    778.3    593.3    142.9     42.8     31.4     30.1    32       25.83
+512    30.0   1497.7   1556.4   1185.1    211.9     38.2     30.6     30.4    64       25.88
+```
 
-## What this would mean
+Scaling fits:
 
-If the gate passes, the narrow statement is:
+```text
+steady learned relation             W ~ N^0.000
+immediately after hidden change     W ~ N^0.975
+after 48 new events/node            W ~ N^0.004
+```
+
+The machine therefore moves through three qualitatively different compute regimes without changing its stored capacity:
+
+```text
+known relationship       -> local / nearly constant query work
+relationship invalid     -> near-global search-like work
+relationship reacquired  -> local / nearly constant query work again
+```
+
+At the same time, online update work remains fixed: about 25.6--25.9 counted slot operations per pair over the full runs, with exactly two endpoint-row updates per pair. Persistent memory grows from 8 KB to 64 KB as N grows 8x.
+
+### Controls after regime change
+
+```text
+N    no-forgetting@96/node   recency-only@48/node   online-decay@48/node
+64            202.0                  123.2                   30.6
+128           390.1                  187.3                   30.5
+256           787.4                  381.8                   31.4
+512          1587.0                  779.3                   30.6
+```
+
+Control fits:
+
+```text
+no forgetting   W ~ N^0.993
+recency only    W ~ N^0.901
+```
+
+So the recovery is not explained simply by keeping recent partners, and local forgetting is necessary for this particular bounded-slot rule to relinquish the old relationship.
+
+## Narrow interpretation
+
+Gate 1D passes as a **mechanism receipt**:
 
 > **A large persistent substrate can be reorganized by bounded endpoint-local updates so that future receiver-relative retrieval becomes local again after experience changes.**
 
-That would make the resource separation concrete:
+In this toy, roughly 32--48 new co-use events per node are enough to restore the constant-work regime across N=64..512. Total reacquisition data still scales with N; what stays bounded is local update work and the number of experiences needed per node.
+
+This makes the resource separation concrete:
 
 ```text
 stored capacity             ~ N
 relationship memory         ~ N
 online update work/event    ~ O(degree)
-steady query work/event     potentially ~ N^0
+steady query work/event     ~ N^0 in this toy
+wrong-model query work      ~ N^1 in this toy
 reacquisition data          ~ constant events/node, total ~ N
 ```
 
+One useful systems interpretation is that repeated interaction can **amortize future computation into persistent local structure**. When the world changes, that amortization becomes wrong and query cost spikes until plasticity rebuilds the relationship.
+
 ## What it does not mean
 
-Even a clean pass does not establish a new learning algorithm or a superior AI architecture.
+This does not establish a new learning algorithm or a superior AI architecture.
 
-This gate remains a synthetic associative world. The learner is given receiver identity and pair co-use events. There is no end-to-end task loss, no learned representation, no ANN/sparse-retrieval baseline, no delta/event-RNN/MoE comparison, and no hardware-memory-traffic result.
+The gate remains a synthetic associative world. The learner is given receiver identity and pair co-use events. There is no end-to-end task loss, no learned representation, no ANN/sparse-retrieval baseline, no delta/event-RNN/MoE comparison, and no hardware-memory-traffic result.
 
-The next serious gate must move from known-answer group recall to a real task where useful structure must emerge from task loss while all update/query costs are matched against strong conditional-compute and sparse-retrieval controls.
+There is also strong prior art on local/activity-dependent structural plasticity and online rewiring. DifferentMachine must not claim structural plasticity itself as new.
+
+The next serious gate must move from known-answer group recall to a task where useful structure has to emerge from task loss while all update/query costs are matched against strong conditional-compute and sparse-retrieval controls.
