@@ -1,6 +1,6 @@
 # DifferentMachine — CURRENT HANDOFF
 
-**Status:** v0 executable substrate + coupled-frontier instrument committed. Gate 0/0b/1A are receipts/instruments only. Full Gate 1 controls remain unrun.
+**Status:** v0 executable substrate + coupled-frontier instrument + capacity-scaling gate committed. Gate 0/0b/1A/1B are receipts/instruments only. Full matched Gate 1 controls remain unrun.
 
 ## One-line thesis
 
@@ -94,6 +94,81 @@ Learned direct relationship RMSE is ~0.0107. The exact value-function policy rem
 
 **Do not promote this as Gate 1 positive.** This is still linear system identification + best-first conditional computation. Delta/event-RNN/MoE controls and router accounting are not in this instrument yet.
 
+## Gate 1B — capacity vs per-event work
+
+Question:
+
+```text
+Can represented capacity N grow much faster than required per-event work W(N, eps)
+at fixed receiver error eps?
+```
+
+Every branch is used exactly twice as an originating address at every capacity, so growing `N` is not dead padding. Receiver relationship memory and acquisition samples are counted separately and grow with `N`.
+
+Fixed setup:
+
+```text
+N                   32, 64, 128, 256, 512
+rho                 0.55
+propagation depth   5
+target NRMSE        0.01
+```
+
+Logical event work is:
+
+```text
+branch expansions + receiver-conditioned scorer calls
+```
+
+Three topology regimes:
+
+```text
+bounded fanout      degree = 3
+mesoscopic mixing   degree ~= sqrt(N)
+increasing mixing   degree ~= N/8
+```
+
+Founding deterministic local receipt:
+
+```text
+bounded degree=3
+N       required K   logical work
+32          24           94.0
+64          24           95.3
+128         24           95.0
+256         24           95.2
+512         24           94.5
+fit W ~ N^0.001
+
+sqrt-degree
+N       degree   required K   logical work
+32        6          48          337.0
+64        8          48          433.0
+128      11          32          385.0
+256      16          48          817.0
+512      23          48         1153.0
+fit W ~ N^0.447
+
+N/8 mixing
+N       degree   required K   logical work
+32        4          24          119.7
+64        8          48          433.0
+128      16          48          817.0
+256      32          48         1585.0
+512      64          32         2081.0
+fit W ~ N^1.011
+```
+
+Global-clock logical state-touch reference scales as `N^1`.
+
+Interpretation:
+
+> **In this toy, required per-event work follows causal fanout/frontier growth much more closely than total represented capacity.**
+
+This gives the hypothesis a real boundary: bounded structural locality can decouple stored capacity from per-event work; increasingly global coupling destroys that decoupling because frontier discovery/scoring itself becomes linear.
+
+This is established locality/sparse-execution territory, not a novelty result. See `docs/GATE1B_CAPACITY_SCALING.md`.
+
 ## Files
 
 ```text
@@ -109,12 +184,14 @@ different_machine/frontier.py
 experiments/gate0_same_machine.py
 experiments/gate0b_receiver_frontier.py
 experiments/gate1a_coupled_frontier.py
+experiments/gate1b_capacity_scaling.py
 
 tests/test_core.py
 tests/test_frontier.py
 
 docs/ARCHITECTURE.md
 docs/GATE1.md
+docs/GATE1B_CAPACITY_SCALING.md
 ```
 
 ## Biological motivation, not implementation claim
@@ -137,6 +214,7 @@ MoE
 activity-sparse RNNs
 predictive/event-triggered communication
 best-first search / value-based prioritization
+bounded-degree local computation
 ```
 
 The possible contribution has to survive as the **combination and measured frontier**: persistent addressed local state + expanding causal frontier + hierarchical promotion + receiver-specific relationship state, with total work tied to receiver-relevant causal change.
@@ -157,6 +235,6 @@ receiver-conditioned learned frontier
 
 Count scorer/router MACs and persistent relationship-state bytes.
 
-The question is now sharp:
+The sharpened question is now:
 
-> **When coupling is real but not global, can a cheap receiver-conditioned active frontier preserve the needed consequence with less total executed work than ordinary conditional-compute controls?**
+> **Can a cheap receiver-conditioned active frontier preserve the bounded-locality scaling advantage after fair conditional-compute controls, when coupling is real but not globally dense?**
