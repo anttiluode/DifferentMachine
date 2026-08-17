@@ -1,6 +1,6 @@
 # DifferentMachine — CURRENT HANDOFF
 
-**Status:** v0 executable substrate + coupled-frontier + capacity-scaling + learned-locality + bounded-online-plasticity + delayed causal-flow credit receipts committed. Gate 0/0b/1A/1B/1C/1D/1E-A are still mechanism receipts/instruments, not a full matched architecture result.
+**Status:** Gate 0/0b/1A/1B/1C/1D/1E-A/1F-A are executable mechanism receipts. There is still **no full matched architecture result and no novelty claim**.
 
 ## One-line thesis
 
@@ -9,65 +9,67 @@
 ## Current machine
 
 ```text
-C(t) persistent contact/branch substrate
-z(t) local state + last-touch time
+small shared developmental genome theta
+        |
+        v
+geometry / event substrate creates local encounters
+        |
+        v
+C(t) persistent sparse structure
+z(t) persistent local activity / phase state
 A(t) addressed / expanding active frontier
-m(t) candidate/promoted outward event
-k     persistent receiver<->branch relationship state / locality overlay
-e     bounded local causal-flow eligibility waiting for task consequence
+m(t) receiver-specific outward consequence
+e(t) local eligibility left by actual signal transport
+        |
+        +-- delayed task consequence stabilizes / weakens used structure
+        `-- weak structure prunes; local encounters can regrow it
 ```
 
-`EventMachine` performs exact lazy updates of contact, branch and receiver state.
-`ClockedMachine` explicitly sweeps the entire represented state every tick.
-`frontier.py` adds a coupled cable graph in which an addressed event can open a best-first causal frontier through neighboring branches under a hard branch-touch budget.
-`plasticity.py` adds offline learned-locality instruments.
-`online_plasticity.py` adds a fixed-degree receiver-local graph that changes only at the two endpoints of each co-use event; local forgetting, reinforcement, insertion and eviction are all O(degree) and require no global pair table or global aging sweep.
-`flow_credit.py` removes the explicit useful-pair teacher for Gate 1E-A: it keeps a fixed-degree overlay plus a bounded candidate scaffold and applies delayed task consequence only to the addressed row using before/after receiver-flow eligibility.
+The newest distinction is now explicit:
 
-## Gate 0 — same machine, different execution
+```text
+genotype  != acquired graph phenotype
+```
+
+The inherited object can be constant-size even though the acquired phenotype and represented capacity scale with `N`.
+
+---
+
+## Gate ladder
+
+### Gate 0 — same machine, different execution
+
+`EventMachine` lazily updates only addressed state; `ClockedMachine` explicitly sweeps everything.
 
 ```text
 4096 contacts
 64 branches
 20,000 ticks
-382 input events
+382 events
 max candidate mismatch       1.11e-16
-max final receiver mismatch  4.16e-17
+max receiver mismatch        4.16e-17
 clocked private touches      83,200,000
 lazy private touches         764
 logical touch ratio          108,900x
 ```
 
-Timing is a reference implementation result only, not a hardware claim.
+Receipt only: quiet persistent state need not be recomputed every global tick.
 
-## Gate 0b — same sender, receiver-relative promotion
+### Gate 0b — receiver-relative promotion
 
-Fixed 20% promotion budget:
+Under a hard 20% promotion budget, a persistent receiver/branch relationship score beats pure candidate magnitude in the deterministic toy. Relationship weights are privileged, so this is not a result.
 
-```text
-receiver 0: magnitude error 1.72e-1  relation-score error 5.37e-2 (~3.2x lower)
-receiver 1: magnitude error 1.34e-1  relation-score error 2.10e-2 (~6.4x lower)
-selected overlap 20/101, Jaccard ~0.11
-```
+### Gate 1A — coupled frontier
 
-The exact final-readout sensitivity control is a privileged ceiling.
+Sparse coupled cable graph + best-first active frontier. Receiver relation beats generic/magnitude scoring across nonzero coupling, but strong conditional-compute baselines are still missing.
 
-## Gate 1A — coupled active-frontier instrument
-
-A 64-branch sparse cable graph opens child consequences only when a frontier item is expanded. Learned receiver relation beats magnitude/generic scoring in the deterministic linear instrument from weak through strong nonzero coupling (`rho=0.15..0.75`).
-
-**Do not promote this as Gate 1 positive.** It is still system identification + best-first conditional computation and has not beaten delta/event-RNN/MoE controls.
-
-## Gate 1B — capacity vs per-event work
+### Gate 1B — capacity vs per-event work
 
 Question:
 
 ```text
-Can represented capacity N grow much faster than required per-event work W(N, eps)
-at fixed receiver error eps?
+Can represented capacity N grow much faster than required per-event work W(N, eps)?
 ```
-
-Every branch is exercised as an originating address. Relationship memory/acquisition grow with `N` and are accounted separately.
 
 ```text
 bounded degree=3       W ~ N^0.001
@@ -76,17 +78,13 @@ N/8 degree              W ~ N^1.011
 global clock reference  W ~ N^1.000
 ```
 
-At bounded degree, required work stayed ~94--95 logical operations while capacity grew 16x from 32 to 512 branches. As fanout became global, frontier discovery itself became linear and the advantage vanished.
-
-Current design constraint:
+Central constraint:
 
 > **Relevance must be locally discoverable.**
 
-See `docs/GATE1B_CAPACITY_SCALING.md`.
+### Gate 1C — learned locality
 
-## Gate 1C — can useful locality itself be learned?
-
-Receiver-labelled co-use is compiled offline to degree-4 local graphs. Two receivers deliberately need incompatible neighborhoods over the same nodes.
+Receiver-labelled co-use is compiled offline into degree-4 overlays. With conflicting receiver neighborhoods:
 
 ```text
 N      pooled work   receiver-conditioned work   random work
@@ -94,188 +92,242 @@ N      pooled work   receiver-conditioned work   random work
 128         285.5                 30.0               399.9
 256         586.2                 30.0               801.2
 512        1230.2                 30.0              1603.3
-
-pooled                W ~ N^1.054
-receiver-conditioned  W ~ N^0.000
-random                W ~ N^0.986
 ```
 
-When receivers are aligned, one pooled graph returns to exactly 6 touches / 30 work / `W ~ N^0`.
+Receiver-specific locality stays flat while pooled/random approaches linear. Still associative graph learning territory.
 
-Narrow interpretation:
+### Gate 1D — bounded online plasticity
 
-> **Useful locality can be learned from repeated co-use in this toy, but locality need not be a single global property of the stored machine. It can be receiver/task-relative.**
-
-This is associative graph learning / clustering territory, not a novelty result.
-
-See `docs/GATE1C_LEARNED_LOCALITY.md`.
-
-## Gate 1D — can cable space grow online, locally, with bounded plasticity?
-
-Gate 1D removes Gate 1C's global-ish learning-time count table and offline compile step.
-
-Each receiver/node stores only 4 neighbor ids and 4 strengths. Pair event `(i,j)` touches only rows `i` and `j`:
+Removes offline compile/count-table cheat. Each pair event touches only two degree-4 rows. After a hidden regime change:
 
 ```text
-locally age the four slots
-reinforce existing relation
-or insert / evict the weakest local relation
+steady learned relationship       W ~ N^0.000
+immediately after change          W ~ N^0.975
+after 48 new events/node          W ~ N^0.004
 ```
 
-No global pair table. No global decay sweep. Degree remains fixed.
+Interpretation:
 
-Fixed setup:
+> **Repeated interaction can amortize future computation into persistent local structure. When the world changes, computation/search spikes, and local plasticity can rebuild the cheap route.**
 
-```text
-N                       64, 128, 256, 512
-group size               8
-receivers                2
-degree                   4
-signal fraction           0.80
-old-regime experience     60 events/node/receiver
-local decay               0.97
-recall target             75%
-seeds                     41,42,43
-```
+Big cheat: plasticity still receives `(receiver, i, j)` co-use.
 
-After learning, both receiver-specific hidden partitions are replaced by independent new partitions. Graphs are not reset.
+### Gate 1E-A — task consequence replaces useful-pair teacher
 
-### GitHub Actions result
-
-```text
-N    steady   shift0    e8      e16     e24     e32     e48     e64    KB   slotOps/pair
-64     30.0    196.7    202.5    154.9     60.2     32.1     30.6     30.0     8       25.65
-128    30.0    379.1    382.6    309.4     94.6     35.5     30.5     30.1    16       25.75
-256    30.0    739.4    778.3    593.3    142.9     42.8     31.4     30.1    32       25.83
-512    30.0   1497.7   1556.4   1185.1    211.9     38.2     30.6     30.4    64       25.88
-```
-
-Scaling:
-
-```text
-steady learned relationship            W ~ N^0.000
-immediately after hidden change        W ~ N^0.975
-after 48 new events/node               W ~ N^0.004
-```
-
-So without changing capacity, the machine passes through:
-
-```text
-relationship valid      -> local / constant work
-relationship invalid    -> near-global search work
-relationship relearned  -> local / constant work again
-```
-
-Online update work remains bounded at ~25.6--25.9 counted slot operations per pair and exactly two endpoint-row updates per pair. Persistent relationship memory scales linearly: 8 KB at N=64 to 64 KB at N=512.
-
-### Controls
-
-```text
-N    no-forgetting@96/node   recency-only@48/node   online-decay@48/node
-64            202.0                  123.2                   30.6
-128           390.1                  187.3                   30.5
-256           787.4                  381.8                   31.4
-512          1587.0                  779.3                   30.6
-
-no forgetting   W ~ N^0.993
-recency only    W ~ N^0.901
-```
-
-Thus simple recency does not explain recovery in this structured-distractor world, and forgetting is necessary for the current bounded-slot rule to relinquish the old relation.
-
-**Narrow Gate 1D receipt:**
-
-> **A large persistent substrate can be reorganized by bounded endpoint-local updates so future receiver-relative retrieval becomes local again after experience changes.**
-
-Roughly 32--48 new events per node reacquire the flat-work regime across N=64..512. Total reacquisition data is still O(N); the constant quantity is experience per node and update work per event.
-
-A useful systems interpretation is:
-
-> **Repeated interaction can amortize future computation into persistent local structure. When the world changes, that amortization becomes wrong, computation/search spikes, and local plasticity rebuilds the cheap route.**
-
-This is still established associative/structural-plasticity territory, not a novelty result.
-
-See `docs/GATE1D_ONLINE_PLASTICITY.md`.
-
-## Gate 1E-A — can task consequence replace the useful-pair teacher?
-
-Gate 1D still received `(receiver, i, j)` co-use as an explicit teaching event. Gate 1E-A removes that pair label and imports the useful negative lesson from `FunctionalArbors`: recent activity / structural birth identity need not be causal enough; eligibility should move closer to **what the structural event actually changed downstream**.
-
-Each task event now records only a bounded local causal-flow trace:
+Removes the explicit useful-pair teaching event.
 
 ```text
 ordinary receiver query
++ edge ablation query
++ candidate perturbation query
         |
-        +-- ablate one current edge -> receiver-flow delta
-        |
-        `-- probe one local candidate -> receiver-flow delta
-
-store: cue, edge ids, the two deltas, receiver's own output sign
-
-... 8 task events later ...
-
-environment returns only:
-    +1 task correct
-    -1 task wrong
-
-credit = outcome * earlier output sign * flow delta
+        v
+flow delta eligibility
+        ... delayed ...
+correct / wrong scalar outcome
 ```
 
-Plasticity never receives hidden group id, useful neighbor id or a pair co-use tuple.
-Only the addressed fixed-degree row is aged/changed when delayed credit settles.
-
-### Verified local receipt
-
-Two seeds (`41,42`), degree 4, fixed 12-candidate proposal scaffold, six-node receiver query budget:
+Two-seed local receipt:
 
 ```text
-N      initial   learned old   immediately after switch   recovered
-64       .653        .846               .616                 .874
-128      .640        .874               .617                 .886
-256      .637        .879               .618                 .887
+N      initial   learned-old   shift0   recovered
+64       .653        .846       .616      .874
+128      .640        .874       .617      .886
+256      .637        .879       .618      .887
 ```
 
-Ordinary receiver query work is fixed at 30 logical operations in the instrument.
-Persistent overlay + proposal storage is 20 / 40 / 80 KB at N=64 / 128 / 256.
-
-Representative N=128 post-switch learning accounting:
+Controls at N=128:
 
 ```text
-receiver probe-query work / task event   89.0
-proposal inspections / task event        12.0
-bounded slot ops / task event            ~60.8
-row updates / task event                  1.00
+main flow x outcome   recovered .886
+outcome shuffled                .602
+flow only                       .614
+reward only                     .656
+frozen                          .639
 ```
 
-The 89 is intentionally visible: the current eligibility instrument pays the normal query plus one existing-edge ablation query plus one candidate-perturbation query.
+But Gate 1E-A still has two ugly cheats:
 
-### Causal controls at N=128
+1. a hand-prepared 12-candidate proposal scaffold;
+2. about 89 receiver-query operations/task event because eligibility is measured with counterfactual probes.
+
+### Gate 1F-A — GENOME, NOT GRAPH
+
+Gate 1F-A attacks both of those cheats.
+
+New files:
 
 ```text
-mode                 learned old   recovered
-main flow x outcome      .874         .886
-outcome shuffled         .629         .602
-flow only                .587         .614
-reward only              .595         .656
-frozen                    .625         .639
+different_machine/development.py
+experiments/gate1f_genome_not_graph.py
+tests/test_development.py
+docs/GATE1F_GENOME_NOT_GRAPH.md
 ```
 
-Thus neither structural flow change alone nor task success alone reproduces the effect in this toy; the causal pairing does.
+#### Inherited object
 
-**Narrow Gate 1E-A receipt:**
+A deterministic mutation-only GA evolves **10 shared float64 genes = 80 bytes**.
 
-> **Given a bounded local proposal scaffold that already contains useful alternatives, receiver-relative topology can be selected and re-selected from delayed end-to-end task consequence without a useful-pair teaching event.**
+The genome contains no node ids and no per-edge values. Every node runs the same decoded local rule controlling:
 
-### The cheats that remain
+```text
+distance preference
+recent-activity similarity
+optional phase similarity
+growth bias
+new edge strength
+local decay
+delayed-credit learning rate
+prune threshold
+activity-trace decay
+activity-driven phase drift
+```
 
-This is not the full Gate 1E finish.
+Canonical evolution:
 
-1. **Proposal discovery is still supplied.** Each node has a fixed 12-candidate physical scaffold deliberately constructed from the union of possible old/new neighborhoods for both receivers plus distractors. The learner must select among candidates, but it does not invent their availability.
-2. **Causal-flow measurement costs work.** Two extra bounded traversals are run per task event.
-3. **The task is binary and synthetic.** Correct/wrong outcome plus the receiver's own earlier output direction is unusually informative.
-4. ANN / sparse-table / delta-RNN / MoE / generic-router controls remain mandatory for the full architecture claim.
+```text
+training N             48
+training world seed    101
+evolution seed         7
+population             14
+generations             9
+fitness                 0.680796
+```
 
-See `docs/GATE1E_FLOW_CREDIT.md`.
+`python experiments/gate1f_genome_not_graph.py --evolve` exactly reproduced the banked raw genome locally.
+
+#### Candidates are geometry, not a supplied list
+
+Nodes live at constant density in a 2-D substrate. A fixed-radius spatial hash exposes only the cue's local 3x3 cell neighborhood.
+
+There is **no `proposals[N,K]` matrix**.
+
+This is only a computational geometry instrument; it is not a claim that biology performs spatial hashing.
+
+#### Eligibility is residue, not an experiment
+
+A normal sparse query actually transports values across active edges. Because the receiver is additive in this toy, the transported value's signed contribution is already known from the ordinary computation.
+
+Each used edge leaves:
+
+```text
+(source, target, signed transported contribution)
+```
+
+Eight task events later, scalar `+1/-1` outcome reward-modulates those used edges. No ablation query. No candidate perturbation query.
+
+Weak touched edges decay below threshold and die; later geometry encounters can grow replacements.
+
+#### Full transfer receipt
+
+The genome evolved only at `N=48`. For every evaluation world the phenotype is erased and regrown from the genome.
+
+Three unseen seeds (`41,42,43`):
+
+```text
+N    initial  learned-old  shift0  recovered  queryW  candidateW  edges/node  phenotypeKB
+64     .714      .781       .719      .780      7.53      22.24       1.141       10.0
+128    .684      .785       .715      .784      6.27      25.18       1.040       20.0
+256    .704      .783       .746      .773      7.17      27.07       1.114       40.0
+512    .707      .791       .736      .783      7.11      28.90       1.110       80.0
+```
+
+So in this synthetic constant-density world:
+
+```text
+inherited genome size             80 bytes, constant
+represented capacity              8x growth: 64 -> 512
+mean query work                   ~6--8
+candidate discovery inspections   ~22 -> ~29
+grown active edges/node           ~1.0--1.14
+```
+
+The phenotype memory itself is still O(N), as expected.
+
+#### Controls
+
+At `N=128`, three unseen seeds:
+
+```text
+condition                     learned-old   recovered
+full developmental genome        .785         .784
+no delayed flow credit           .758         .720
+no growth                        .726         .732
+static phase, matched offset     .773         .765
+```
+
+The phase result is modest. **Do not claim oscillations are essential.** Phase is presently only an optional dynamical coordinate that evolution happened to use in this toy.
+
+#### Genome vs phenotype transfer
+
+At unseen `N=64` worlds:
+
+```text
+erase learned graph + regrow from genome   .781
+replay inherited grown graph by node id    .647
+```
+
+This is the cleanest Gate 1F-A observation:
+
+> **What transferred in this toy was more useful as a developmental rule than as the previously acquired topology.**
+
+#### What was actually removed
+
+Compared with Gate 1E-A:
+
+```text
+hand-prepared candidate union     REMOVED
+counterfactual ablation query     REMOVED
+counterfactual candidate probe    REMOVED
+useful-pair teacher               still REMOVED
+```
+
+What remains is an ordinary local substrate, sparse query, local persistent state, structural birth/death at the edge level, and delayed task consequence.
+
+---
+
+## Gate 1F-A guardrails
+
+This is still a synthetic mechanism receipt.
+
+1. **Smooth spatial task:** useful relations are deliberately correlated with geometry.
+2. **One evolutionary training world:** the GA has not yet been trained across a distribution of worlds.
+3. **Fixed node set:** edges are born/pruned; nodes do not divide, differentiate or die.
+4. **Fixed degree / query budget:** bounded inference work is partly by construction.
+5. **No hardware claim:** Python logical work only; no real cache/memory-traffic result.
+6. **No strong retrieval baselines:** ANN/HNSW, sparse tables, generic routers, event-RNN/delta and MoE controls remain mandatory.
+7. **No real event stream yet.**
+
+Do not claim invention of neuroevolution, developmental encodings, NEAT/HyperNEAT-like ideas, neural developmental programs, structural plasticity, reward-modulated plasticity, evolved local learning rules, or activity-dependent growth/pruning.
+
+The possible DifferentMachine contribution remains the measured combination and scaling frontier:
+
+> **Can represented capacity and acquired structure grow much faster than the amount of machine that must wake, search and adapt for each event?**
+
+---
+
+## Immediate next experiment
+
+Do **not** add node reproduction/death merely because the biological analogy is attractive.
+
+The next hard step should remove the synthetic smooth-geometry favor:
+
+> **Can the shared developmental rule create/revise useful sparse structure from a real sparse event stream, while candidate discovery, update cost and receiver query work remain bounded as stored capacity grows?**
+
+Best substrate already in the repo family: `NeuromorphicDVSplusEMDfield`.
+
+Why:
+
+```text
+real webcam/event coordinates -> natural geometry
+DVS changes                    -> naturally sparse addressed arrivals
+persistent held field          -> local temporal residue
+stored identities/templates    -> capacity axis that can be scaled
+```
+
+That gives the next matched test against exhaustive template matching and ANN/HNSW rather than another graph-only toy.
+
+---
 
 ## Files
 
@@ -285,6 +337,7 @@ different_machine/frontier.py
 different_machine/plasticity.py
 different_machine/online_plasticity.py
 different_machine/flow_credit.py
+different_machine/development.py
 
 experiments/gate0_same_machine.py
 experiments/gate0b_receiver_frontier.py
@@ -293,12 +346,14 @@ experiments/gate1b_capacity_scaling.py
 experiments/gate1c_learned_locality.py
 experiments/gate1d_online_plasticity.py
 experiments/gate1e_flow_credit.py
+experiments/gate1f_genome_not_graph.py
 
 tests/test_core.py
 tests/test_frontier.py
 tests/test_plasticity.py
 tests/test_online_plasticity.py
 tests/test_flow_credit.py
+tests/test_development.py
 
 docs/ARCHITECTURE.md
 docs/GATE1.md
@@ -306,66 +361,5 @@ docs/GATE1B_CAPACITY_SCALING.md
 docs/GATE1C_LEARNED_LOCALITY.md
 docs/GATE1D_ONLINE_PLASTICITY.md
 docs/GATE1E_FLOW_CREDIT.md
+docs/GATE1F_GENOME_NOT_GRAPH.md
 ```
-
-## Biological motivation, not implementation claim
-
-Aizenbud et al. 2026 motivate separating rich dendritic processing from narrow outward spike communication: morphology can support electrical compartmentalization / semi-independent dendritic subunits, while their functional-complexity assay ultimately evaluates somatic spike prediction.
-
-DifferentMachine does **not** claim to simulate a biological neuron.
-
-FunctionalArbors contributes a negative-result guardrail rather than a biological claim: v0.9 found that recent activity and exact birth-event eligibility were not sufficient for robust free structural credit, motivating a local before/after flow-redistribution tag as the next cleaner causal mark.
-
-## Prior-art guardrail
-
-Do not claim invention of:
-
-```text
-event-driven neural computation
-AER
-spiking
-delta inference
-conditional computation
-MoE
-activity-sparse RNNs
-predictive/event-triggered communication
-best-first search / value-based prioritization
-bounded-degree local computation
-associative graph learning / clustering
-sparse retrieval / indexing
-local / activity-dependent structural plasticity
-online graph rewiring
-three-factor / reward-modulated plasticity
-perturbation-based structural credit assignment
-```
-
-The possible contribution has to survive as the **combination and measured frontier**: persistent addressed local state + learned/adaptive bounded locality + expanding causal frontier + hierarchical promotion + receiver-specific relationship state, with total work tied to receiver-relevant causal change.
-
-## Immediate next gate
-
-The explicit useful-pair teacher has now been removed from the credit-assignment instrument. The largest remaining cheat is the fixed local proposal scaffold.
-
-The next question is therefore:
-
-> **Can candidate relations themselves arise from an ordinary real substrate / event stream, while useful credit and discovery both remain bounded?**
-
-Requirements for the next stage:
-
-```text
-no latent useful-pair label
-no hand-prepared union of useful candidate neighborhoods
-candidate structure produced by an ordinary stream / substrate
-local causal eligibility only
-receiver/task switch without reset
-fixed-degree bounded persistent memory
-account candidate-discovery cost + eligibility-probe cost
-ANN / sparse-table retrieval controls
-delta / event-RNN / MoE / generic-router controls
-actual query + update wall clock and memory traffic
-```
-
-This is where the repo combinations become relevant: event vision can supply natural sparse arrivals and physical neighborhoods; Mycelial Cortex can supply persistent distributed memory; Clutch can decide when to widen; MaturingGate can suppress predictable propagation; HorizonNet's autopsy suggests receiver/decision-space stopping rather than global state settling.
-
-If task-driven candidate discovery cannot recover the bounded-locality advantage under these controls, DifferentMachine remains a useful systems decomposition / learned index rather than a new AI execution architecture.
-
-The full matched Gate 1 conditional-compute comparison remains mandatory before any architecture claim.
