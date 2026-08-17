@@ -1,232 +1,246 @@
 # DifferentMachine
 
-> **The size of the machine is not necessarily the amount of machine that must run.**
+> **The size of the represented machine need not equal the amount of machine executed for each event.**
 
-`DifferentMachine` is an executable research sketch for a different AI execution
-primitive:
+`DifferentMachine` is an executable research program around one systems question:
+
+> **Can a large learned machine keep most of its capacity as persistent local possibility, while the work performed for each event follows only the receiver-relevant causal frontier?**
+
+It is not a claim that event-driven computing, sparse retrieval, structural plasticity, neuroevolution, spiking, MoE, or developmental neural systems are new.
+
+The repo is deliberately built as a sequence of killable gates rather than one large architecture claim.
+
+## Current picture
 
 ```text
-persistent substrate / cable space
-        +
-persistent local state
-        +
-addressed events
+small shared developmental rule / genome
+        |
+        v
+persistent substrate + local state
+        |
+addressed event / local encounter
         |
         v
 small active causal frontier
         |
         v
-hierarchical promotion
+receiver-specific consequence
         |
-        v
-receiver-specific public consequence
+        +-- ordinary participation leaves local eligibility
+        +-- delayed task consequence stabilizes / weakens structure
+        `-- weak structure prunes; local encounters can regrow it
 ```
 
-This is **not** a claim that matrix mathematics is wrong, that the brain is
-mostly inactive, or that event-driven neural computation is new. Spiking
-networks, AER, event-RNNs, delta inference, conditional computation and Mixture
-of Experts already occupy large parts of this territory.
-
-The question is narrower:
-
-> **Can a large learned machine keep most of its capacity as persistent local
-> possibility, while executed work scales with the receiver-relevant causal
-> frontier rather than total represented capacity?**
-
-## Why this repo exists
-
-Recent work in `GeometricNeuronV23`, `Y`, `Z`, `PivotPoint`, `WidePresent` and
-`MoireMandelbrot` converged on four distinctions:
+The current conceptual state is:
 
 ```text
-C(t)  persistent substrate: what computation can happen
-z(t)  local persistent state: unfinished history in the substrate
-A(t)  active frontier: what is being strongly computed now
-m(t)  promoted event: what consequence crosses a boundary
+C(t)  persistent substrate / acquired structure
+z(t)  persistent local state
+A(t)  active causal frontier
+m(t)  promoted receiver consequence
+e(t)  local eligibility left by actual signal transport
+theta small shared developmental rule
 ```
 
-A conventional dense step often makes these look like one object:
+The newest distinction is:
+
+> **genome != acquired graph phenotype**
+
+The graph can be destroyed while the small inherited rule remains able to grow another one.
+
+## Gate ladder
+
+| Gate | Question | Narrow receipt |
+|---|---|---|
+| 0 | Must all persistent state be explicitly updated every tick? | No: exact lazy execution matched the clocked machine while touching dramatically less quiet state. |
+| 0b | Can the active foreground depend on the receiver? | In a toy hard-budget readout, receiver relation beats pure magnitude. |
+| 1A | Can a causal frontier expand through coupled structure? | Yes as an instrument; still missing strong matched baselines. |
+| 1B | Can capacity grow faster than work/event? | With bounded local degree, `W ~ N^0.001`; when fanout becomes global the advantage dies. |
+| 1C | Can useful locality itself be learned? | Receiver-specific learned overlays stay flat-work while pooled/random graphs approach linear work. |
+| 1D | Can locality reorganize online with bounded updates? | Yes in a synthetic co-use world; after hidden change work spikes toward global search, then returns to flat scaling after relearning. |
+| 1E-A | Can delayed task consequence replace the useful-pair teacher? | Yes in a toy when causal flow is measured explicitly; but candidate lists and counterfactual probe cost remain. |
+| 1F-A | Can a small shared rule grow the graph instead of inheriting it? | Yes in the current synthetic spatial task: geometry creates candidates, normal flow leaves eligibility, edges grow/prune, and an 80-byte evolved rule transfers across unseen worlds and larger `N`. |
+
+See [`HANDOFF_CURRENT.md`](HANDOFF_CURRENT.md) for the live research state and caveats.
+
+## Gate 1B: the scaling constraint
+
+The central scaling result that constrains everything after it is:
 
 ```text
-h_next = phi(W h)
+bounded degree=3       W ~ N^0.001
+sqrt(N) degree          W ~ N^0.447
+N/8 degree              W ~ N^1.011
+global clock reference  W ~ N^1.000
 ```
 
-`DifferentMachine` keeps them separate.
+So the design rule is not merely "be sparse":
 
-The first implementation compiles contact -> branch routing into persistent
-structure. An input event touches one addressed contact, updates that contact's
-private state, updates its home branch, and only then creates a candidate public
-event. Quiet contacts and branches keep state without being swept every clock
-tick.
+> **Relevance must be locally discoverable.**
 
-## Gate 0: same machine, different execution
+If discovering relevance itself requires a global scan, the machine has only moved the cost.
 
-`experiments/gate0_same_machine.py` runs the **same mathematical machine** two
-ways:
+## Gate 1D: experience amortizes future work into structure
 
-1. `ClockedMachine`: explicitly decays every contact, branch and receiver every
-   tick.
-2. `EventMachine`: advances only the addressed contact/branch and lazily catches
-   that state up when it is next touched.
-
-Local deterministic receipt:
+With fixed-degree local online plasticity:
 
 ```text
-contacts                       : 4096
-branches                       : 64
-ticks                          : 20,000
-input events                   : 382
-
-max candidate mismatch         : 1.11e-16
-max final receiver mismatch    : 4.16e-17
-
-clocked private-state touches  : 83,200,000
-addressed/lazy touches         : 764
-logical touch ratio            : 108,900x
+relationship valid      -> local / approximately constant work
+relationship invalid    -> near-global search work
+relationship relearned  -> local / approximately constant work again
 ```
 
-The local NumPy reference was also faster, but **that wall-clock ratio is not a
-hardware result**. Dense vectorized kernels and event runtimes have very
-different implementation economics. Gate 0 proves only the execution identity:
-quiet private state can persist without being explicitly recomputed on every
-global tick.
+This suggests a useful systems interpretation:
 
-Run:
+> **Repeated interaction can amortize future computation into persistent local structure.**
+
+## Gate 1E-A: task consequence without a useful-pair teacher
+
+Gate 1E-A removed the explicit `(receiver, i, j)` co-use teacher and used delayed task outcome to select topology.
+
+It passed a synthetic causal-control screen, but it still paid for:
+
+```text
+normal receiver query
++ existing-edge ablation query
++ candidate perturbation query
+```
+
+and still received a hand-prepared bounded candidate scaffold.
+
+That was intentionally not the endpoint.
+
+## Gate 1F-A: genome, not graph
+
+Gate 1F-A removes those two conveniences from the current instrument.
+
+### Candidate generation
+
+Nodes live in a constant-density 2-D substrate. Candidate relations are produced by a fixed-radius spatial hash around the addressed node.
+
+There is no hand-supplied `proposals[N,K]` matrix.
+
+### Eligibility
+
+When an ordinary sparse query transports a value across an edge, that transport leaves a small local eligibility residue. Delayed scalar success/failure later modulates only edges that actually participated.
+
+There is no ablation or candidate counterfactual query in Gate 1F-A.
+
+### Inherited object
+
+A deterministic mutation-only genetic algorithm evolves ten shared float64 values:
+
+```text
+10 genes = 80 bytes
+training size N = 48
+```
+
+Those genes control local growth/pruning dynamics; they contain no node ids or per-edge weights.
+
+The canonical search is reproducible:
 
 ```bash
-python experiments/gate0_same_machine.py
+python experiments/gate1f_genome_not_graph.py --evolve
 ```
 
-## Gate 0b: the active frontier can be receiver-relative
+### Transfer receipt
 
-`experiments/gate0b_receiver_frontier.py` gives the same sender a hard promotion
-budget and compares:
+The phenotype is erased before every unseen world. The same genome is then regrown at larger capacities:
 
 ```text
-magnitude score
-    |candidate|
-
-relationship score
-    |candidate * receiver_branch_relation|
-
-privileged oracle ceiling
-    exact contribution to a chosen final receiver readout
+N    initial  learned-old  shift0  recovered  queryW  candidateW  edges/node
+64     .714      .781       .719      .780      7.53      22.24       1.141
+128    .684      .785       .715      .784      6.27      25.18       1.040
+256    .704      .783       .746      .773      7.17      27.07       1.114
+512    .707      .791       .736      .783      7.11      28.90       1.110
 ```
 
-At a 20% promotion budget in the deterministic receipt, the simple persistent
-receiver/branch relationship score reduced final-readout error versus pure
-magnitude selection by about `3.2x` for receiver 0 and `6.4x` for receiver 1.
-The two receivers selected almost disjoint foregrounds (Jaccard ~0.11) from the
-same sender trace.
+The genome was evolved only at `N=48`. The represented capacity sweep above reaches more than 10x that evolutionary training size while the inherited rule remains 80 bytes.
 
-This is **not a result** yet. The relationship weights are available to the toy
-machine, and the final-readout oracle is deliberately privileged. It only earns
-the next experiment: learn/adapt the relation cheaply and compare it against
-strong conditional-compute controls.
-
-Run:
-
-```bash
-python experiments/gate0b_receiver_frontier.py
-```
-
-## The primitive
-
-```python
-event = InputEvent(t=..., address=..., value=...)
-
-machine = EventMachine(spec)
-candidate = machine.process_event(event)
-```
-
-Internally:
+At `N=64`:
 
 ```text
-addressed contact
-    persistent local state
-        |
-        v
-home branch
-    persistent branch state
-        |
-        v
-candidate outward event
-        |
-        +-- die locally
-        `-- promote to receiver(s)
+erase graph + regrow from genome   .781
+replay inherited grown graph       .647
 ```
 
-Routing is already partly compiled into structure: an event does not run a
-global router to discover its first destination. The contact address selects the
-local state and home branch.
+So in this toy, the transferable object is more useful as a **developmental rule** than as the previously learned adjacency itself.
 
-## Why the dendrite analogy is useful
+Detailed write-up: [`docs/GATE1F_GENOME_NOT_GRAPH.md`](docs/GATE1F_GENOME_NOT_GRAPH.md).
 
-Aizenbud et al. (PNAS, 2026) report that larger dendritic surface/extent and
-branching are associated with greater modeled single-neuron functional
-complexity, and discuss electrical compartmentalization that allows dendritic
-regions to act as semi-independent computational subunits. Their complexity
-assay ultimately evaluates somatic spike prediction.
+## Biological motivation, not implementation claim
 
-That motivates—but does not prove—the systems decomposition used here:
+The biology is useful as a source of decomposition questions:
 
 ```text
-rich private local processing
-        ->
-narrow outward event interface
+rich local persistent dynamics
+narrow outward consequences
+activity-dependent structural change
+multiple timescales
+growth / stabilization / pruning
 ```
 
-Reference:
+`DifferentMachine` does **not** claim to simulate a neuron, dendrite, gene regulatory network, or developing brain.
 
-> Aizenbud et al. (2026), *Dendritic morphology and synaptic nonlinearities
-> enhance functional complexity in human cortical neurons*, PNAS 123(28),
-> e2533168123. DOI: 10.1073/pnas.2533168123.
+The current 1F substrate has edge birth and edge death only. Nodes do not yet divide, differentiate, reproduce, or die.
 
-## What must be beaten
+## What still has to be beaten
 
-A real `DifferentMachine` result has to beat or explain itself relative to:
+A real architecture result must compare against strong ordinary alternatives, including:
 
-- dense recurrent / SSM execution,
-- delta / temporal-sparsity inference,
-- activity-sparse event-RNN / EGRU-like execution,
-- dynamic-k / Mixture-of-Experts routing,
-- ordinary learned magnitude/surprise gating,
-- task-oriented bottlenecks / learned communication.
+- ANN/HNSW or sparse-table retrieval;
+- learned routers / conditional computation;
+- delta / temporal-sparsity inference;
+- event-RNN / activity-sparse recurrent execution;
+- MoE-style routing;
+- dense recurrent / SSM baselines where appropriate.
 
 And it must pay for:
 
-- router/scorer MACs,
-- persistent local/relationship-state bytes,
-- state-update cost,
-- synchronization,
-- reacquisition after sender/task changes,
-- actual CPU/GPU wall clock.
+- candidate discovery;
+- router/scorer work;
+- persistent state bytes;
+- update cost;
+- synchronization;
+- reacquisition after change;
+- actual CPU/GPU wall clock and memory traffic.
 
-See [`docs/GATE1.md`](docs/GATE1.md).
+## Current largest cheats
 
-## Current design sentence
+Gate 1F-A is still favorable to itself:
 
-> **Capacity lives in persistent structure and local state. Computation wakes
-> where an event lands, expands only along a budgeted causal frontier, and
-> crosses a boundary only when the receiver needs the consequence.**
+1. the synthetic task is spatially smooth, so proximity is genuinely informative;
+2. the GA evolved on one small training world rather than a distribution;
+3. degree and query budget are fixed;
+4. the node population is fixed;
+5. there is no real-stream or hardware result yet.
 
-That is the machine we are trying to build.
+The next useful test is therefore **not more biological machinery**. It is a real sparse event substrate where geometry is supplied by the world rather than designed for the task.
+
+The strongest existing candidate in the repo family is `NeuromorphicDVSplusEMDfield`: real image/event coordinates can generate candidacy naturally, while stored identity/template capacity supplies a practical scaling axis.
 
 ## Quick start
 
 ```bash
 python -m pip install numpy pytest
 pytest -q
+
 python experiments/gate0_same_machine.py
-python experiments/gate0b_receiver_frontier.py
+python experiments/gate1b_capacity_scaling.py
+python experiments/gate1d_online_plasticity.py
+python experiments/gate1f_genome_not_graph.py
+
+# heavier transfer sweep
+python experiments/gate1f_genome_not_graph.py --full
+
+# reproduce the tiny genetic search
+python experiments/gate1f_genome_not_graph.py --evolve
 ```
 
 Python 3.11 and 3.13 are exercised in GitHub Actions.
 
 ## Status
 
-**v0 / founding receipts. No novelty claim.**
+**Research prototype / mechanism receipts. No novelty or production-performance claim.**
 
-The next code allowed to matter is Gate 1: a learnable receiver-conditioned
-frontier scorer under genuine cross-branch coupling, compared at matched quality
-and matched compute against the controls above.
+The live handoff is [`HANDOFF_CURRENT.md`](HANDOFF_CURRENT.md).
