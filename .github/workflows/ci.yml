@@ -51,3 +51,6 @@ jobs:
 
       - name: Gate 1D online plasticity
         run: python experiments/gate1d_online_plasticity.py
+
+      - name: Gate 1F developmental genome receipt
+        run: python experiments/gate1f_genome_not_graph.py
